@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Μέρα Δύο — Day Two in Athens</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,600;0,700;0,800;0,900;1,400;1,700&family=Architects+Daughter&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sky: #1a6fba;
+  --sea: #0d4f8c;
+  --sun: #ffd93d;
+  --white: #ffffff;
+  --sand: #f5e6c8;
+  --terracotta: #e07a5f;
+  --olive: #5c7a3e;
+  --text: #1a1a2e;
+  --muted: #5a5a7a;
+  --correct: #4caf50;
+  --wrong: #e07a5f;
+  --card: rgba(255,255,255,0.93);
+  --radius: 20px;
+  --purple: #7c3aed;
+  --orange: #ea580c;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: linear-gradient(180deg, #f97316 0%, #fb923c 20%, #fbbf24 40%, #87CEEB 60%, #4a9fd4 80%, #1a5a9e 100%);
+  min-height: 100vh;
+  overflow-x: hidden;
+  color: var(--text);
+}
+
+/* ── SCENE ── */
+.scene {
+  position: fixed; inset: 0;
+  pointer-events: none; z-index: 0; overflow: hidden;
+}
+
+.sun {
+  position: absolute; top: 20px; right: 50px;
+  width: 90px; height: 90px;
+  background: var(--sun);
+  border-radius: 50%;
+  box-shadow: 0 0 0 15px rgba(255,217,61,0.15), 0 0 60px rgba(255,217,61,0.4);
+  animation: sunPulse 5s ease-in-out infinite;
+}
+
+@keyframes sunPulse {
+  0%,100% { box-shadow: 0 0 0 15px rgba(255,217,61,0.15), 0 0 60px rgba(255,217,61,0.4); }
+  50% { box-shadow: 0 0 0 25px rgba(255,217,61,0.1), 0 0 90px rgba(255,217,61,0.5); }
+}
+
+.cloud { position: absolute; background: white; border-radius: 50px; opacity: 0.6; }
+.cloud::before, .cloud::after { content:''; position: absolute; background: white; border-radius: 50%; }
+.c1 { width:110px; height:32px; top:80px; left:-110px; animation: cloudMove 28s linear infinite; }
+.c1::before { width:55px; height:55px; top:-28px; left:12px; }
+.c1::after { width:38px; height:38px; top:-18px; left:52px; }
+.c2 { width:75px; height:24px; top:130px; left:-75px; animation: cloudMove 40s 12s linear infinite; opacity:0.4; }
+.c2::before { width:38px; height:38px; top:-20px; left:8px; }
+.c2::after { width:28px; height:28px; top:-14px; left:36px; }
+.c3 { width:90px; height:28px; top:50px; left:-90px; animation: cloudMove 32s 5s linear infinite; opacity:0.35; }
+.c3::before { width:45px; height:45px; top:-23px; left:10px; }
+.c3::after { width:32px; height:32px; top:-16px; left:44px; }
+
+@keyframes cloudMove { from { transform:translateX(0); } to { transform:translateX(110vw); } }
+
+.sea-layer {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 30%;
+  background: linear-gradient(180deg, #1a8fd1 0%, #0d6aad 40%, #0a4f8a 100%);
+  border-radius: 60% 60% 0 0 / 20px 20px 0 0;
+}
+.wave { position:absolute; top:-12px; left:-10%; width:120%; height:25px; background:rgba(255,255,255,0.25); border-radius:50%; animation: waveMove 3.5s ease-in-out infinite; }
+.wave2 { top:-6px; animation: waveMove2 4.5s 1.2s ease-in-out infinite; opacity:0.4; }
+@keyframes waveMove { 0%,100%{transform:translateX(0) scaleY(1);} 50%{transform:translateX(-20px) scaleY(1.3);} }
+@keyframes waveMove2 { 0%,100%{transform:translateX(0) scaleY(1);} 50%{transform:translateX(20px) scaleY(0.8);} }
+
+.buildings {
+  position: absolute; bottom: 29%;
+  left: 0; right: 0;
+  display: flex; align-items: flex-end;
+  justify-content: center; gap: 3px; padding: 0 10px;
+}
+
+.building { background: white; border-radius: 4px 4px 0 0; position: relative; border: 2px solid rgba(0,0,0,0.04); }
+.building .win { position: absolute; background: rgba(255,200,100,0.5); border-radius: 2px; border: 1px solid rgba(0,0,0,0.08); }
+
+/* ── APP ── */
+.app {
+  position: relative; z-index: 1;
+  min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 20px 16px 60px;
+}
+
+/* ── INTRO ── */
+#screen-intro {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  min-height: 100vh; padding: 20px; text-align: center;
+}
+
+.title-card {
+  background: var(--card); border-radius: var(--radius);
+  padding: 36px 28px; max-width: 480px; width: 100%;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+  border: 3px solid rgba(255,255,255,0.8);
+}
+
+.day-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 16px;
+  background: rgba(251,191,36,0.15);
+  border: 2px solid rgba(251,191,36,0.4);
+  border-radius: 100px;
+  font-size: 12px; font-weight: 800;
+  color: var(--orange); letter-spacing: 2px;
+  text-transform: uppercase; margin-bottom: 16px;
+}
+
+.game-title {
+  font-family: 'Architects Daughter', cursive;
+  font-size: clamp(26px,5vw,38px);
+  color: var(--sky); margin-bottom: 6px; line-height: 1.2;
+}
+
+.game-tagline { font-size: 14px; color: var(--muted); margin-bottom: 20px; line-height: 1.7; }
+
+.recap-box {
+  background: linear-gradient(135deg,#f0f9ff,#e0f2fe);
+  border: 2px solid rgba(26,111,186,0.2);
+  border-radius: 16px; padding: 16px 18px;
+  margin-bottom: 20px; text-align: left;
+}
+
+.recap-title {
+  font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--sky); font-weight: 800; margin-bottom: 10px;
+}
+
+.recap-list { list-style: none; display: flex; flex-direction: column; gap: 5px; }
+.recap-list li {
+  font-size: 13px; color: var(--text);
+  display: flex; align-items: center; gap: 8px;
+}
+
+.character-row {
+  display: flex; justify-content: center; gap: 16px; margin-bottom: 20px;
+}
+
+.char-bubble { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+
+.char-avatar {
+  width: 58px; height: 58px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; border: 3px solid;
+  animation: avatarBounce 2.2s ease-in-out infinite;
+}
+
+.char-avatar.nikos { background:#ffd93d20; border-color:var(--sun); animation-delay:0s; }
+.char-avatar.sofia { background:#e07a5f20; border-color:var(--terracotta); animation-delay:0.3s; }
+.char-avatar.kyrios { background:#5c7a3e20; border-color:var(--olive); animation-delay:0.6s; }
+.char-avatar.elektra { background:#7c3aed20; border-color:var(--purple); animation-delay:0.9s; }
+
+@keyframes avatarBounce { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-6px);} }
+
+.char-name { font-size: 10px; font-weight: 700; color: var(--muted); letter-spacing:1px; text-transform:uppercase; text-align:center; }
+
+.new-char-badge {
+  font-size:9px; background:var(--terracotta); color:white;
+  padding:1px 6px; border-radius:100px; font-weight:800;
+}
+
+.intro-text {
+  font-size: 14px; color: var(--text); line-height: 1.7;
+  margin-bottom: 22px; text-align: left;
+  background: #fdf4ff; border-radius: 12px; padding: 14px 16px;
+  border-left: 4px solid var(--purple);
+}
+
+.start-btn {
+  width: 100%; padding: 16px;
+  background: linear-gradient(135deg, var(--orange), #dc2626);
+  border: none; border-radius: 100px; color: white;
+  font-family: 'Nunito', sans-serif; font-size: 17px; font-weight: 800;
+  cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 6px 20px rgba(234,88,12,0.4);
+}
+.start-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(234,88,12,0.5); }
+
+/* ── GAME SCREEN ── */
+#screen-game { display: none; width: 100%; max-width: 560px; }
+
+/* ── HEADER ── */
+.chapter-header {
+  background: var(--card); border-radius: var(--radius);
+  padding: 14px 20px; margin-bottom: 16px;
+  display: flex; align-items: center; justify-content: space-between;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  border: 2px solid rgba(255,255,255,0.8); gap: 10px; flex-wrap: wrap;
+}
+
+.chapter-tag { font-size: 11px; letter-spacing:2px; text-transform:uppercase; color:var(--orange); font-weight:700; }
+
+.chapter-progress { display:flex; gap:5px; align-items:center; }
+.prog-dot { width:7px; height:7px; border-radius:50%; background:rgba(234,88,12,0.15); transition:all 0.3s; }
+.prog-dot.done { background:var(--correct); }
+.prog-dot.current { background:var(--orange); transform:scale(1.4); }
+
+.vocab-count { font-size:13px; font-weight:700; color:var(--olive); background:rgba(92,122,62,0.1); padding:4px 10px; border-radius:100px; }
+
+/* ── SCENE CARD ── */
+.scene-card {
+  background: var(--card); border-radius: var(--radius);
+  overflow: hidden; margin-bottom: 14px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+  border: 2px solid rgba(255,255,255,0.8);
+  animation: cardSlide 0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+@keyframes cardSlide {
+  from { opacity:0; transform:translateX(30px) scale(0.97); }
+  to { opacity:1; transform:translateX(0) scale(1); }
+}
+
+.scene-image-bar {
+  padding: 20px 20px 0;
+  display: flex; align-items: flex-start; gap: 14px;
+}
+
+.char-face {
+  width:54px; height:54px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:27px; border:3px solid; flex-shrink:0;
+}
+
+.char-face.nikos { background:#ffd93d20; border-color:var(--sun); }
+.char-face.sofia { background:#e07a5f20; border-color:var(--terracotta); }
+.char-face.kyrios { background:#5c7a3e20; border-color:var(--olive); }
+.char-face.elektra { background:#7c3aed20; border-color:var(--purple); }
+.char-face.player { background:#4a9eff20; border-color:#4a9eff; }
+.char-face.stranger { background:#6b728020; border-color:#6b7280; }
+
+.char-speaking-name { font-size:10px; font-weight:700; text-align:center; margin-top:4px; color:var(--muted); letter-spacing:1px; text-transform:uppercase; }
+
+.speech-bubble {
+  flex:1; background:white; border-radius:16px 16px 16px 4px;
+  padding:14px 16px; border:2px solid rgba(26,111,186,0.12);
+  font-size:15px; line-height:1.6; color:var(--text);
+}
+
+.speech-bubble .greek-line { font-weight:800; font-size:16px; color:var(--sky); margin-bottom:4px; }
+.speech-bubble .phonetic { font-size:12px; color:var(--terracotta); font-style:italic; margin-bottom:4px; }
+.speech-bubble .translation { font-size:13px; color:var(--muted); }
+
+.scene-context {
+  padding:14px 20px; font-size:14px; color:var(--muted);
+  line-height:1.6; font-style:italic;
+  border-top:1px solid rgba(0,0,0,0.05);
+}
+.scene-context strong { color:var(--text); font-style:normal; }
+
+/* ── VOCAB SPOTLIGHT ── */
+.vocab-spotlight {
+  background:linear-gradient(135deg,#fffbf0,#fff7e6);
+  border-radius:var(--radius); padding:18px;
+  margin-bottom:14px;
+  box-shadow:0 4px 16px rgba(0,0,0,0.07);
+  border:2px solid rgba(251,191,36,0.3);
+  animation:cardSlide 0.4s 0.08s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+
+.vocab-title { font-size:10px; letter-spacing:3px; text-transform:uppercase; color:var(--orange); font-weight:800; margin-bottom:12px; }
+
+.vocab-items { display:flex; flex-direction:column; gap:8px; }
+
+.vocab-item {
+  display:flex; align-items:center; gap:12px;
+  padding:10px 14px; background:white; border-radius:12px;
+  border:2px solid rgba(251,191,36,0.2);
+  cursor:pointer; transition:all 0.2s; position:relative; overflow:hidden;
+}
+
+.vocab-item::before {
+  content:''; position:absolute; left:0; top:0; bottom:0;
+  width:4px; background:var(--orange); border-radius:2px 0 0 2px;
+}
+
+.vocab-item:hover { border-color:rgba(251,191,36,0.4); transform:translateX(3px); }
+.vocab-item.revealed { border-color:rgba(76,175,80,0.3); background:#f0fff4; }
+.vocab-item.revealed::before { background:var(--correct); }
+
+.vocab-emoji { font-size:20px; flex-shrink:0; }
+.vocab-text { flex:1; }
+.vocab-greek { font-size:16px; font-weight:800; color:var(--sky); display:block; }
+.vocab-phonetic { font-size:11px; color:var(--terracotta); font-style:italic; display:block; }
+.vocab-english { font-size:13px; color:var(--muted); display:block; margin-top:2px; }
+.vocab-tap-hint { font-size:10px; color:rgba(90,90,122,0.4); text-align:right; white-space:nowrap; }
+.vocab-item.revealed .vocab-tap-hint { display:none; }
+.vocab-reveal-badge { display:none; font-size:16px; }
+.vocab-item.revealed .vocab-reveal-badge { display:block; }
+
+/* ── GRAMMAR ASIDE ── */
+.grammar-aside {
+  background:linear-gradient(135deg,#f5f3ff,#ede9fe);
+  border:2px solid rgba(124,58,237,0.2);
+  border-left:4px solid var(--purple);
+  border-radius:var(--radius); padding:14px 18px;
+  margin-bottom:14px; font-size:13px; color:var(--muted);
+  line-height:1.7;
+  animation:cardSlide 0.4s 0.12s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+
+.grammar-aside-label {
+  font-size:9px; letter-spacing:3px; text-transform:uppercase;
+  color:var(--purple); font-weight:800; margin-bottom:6px;
+}
+
+.grammar-aside strong { color:var(--text); }
+.grammar-aside .eg { font-family:monospace; color:var(--sky); font-weight:700; }
+
+/* ── CHALLENGE ── */
+.challenge-card {
+  background:var(--card); border-radius:var(--radius); padding:18px;
+  margin-bottom:14px;
+  box-shadow:0 4px 16px rgba(0,0,0,0.07);
+  border:2px solid rgba(234,88,12,0.2);
+  animation:cardSlide 0.4s 0.16s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+
+.challenge-label {
+  font-size:10px; letter-spacing:3px; text-transform:uppercase;
+  color:var(--terracotta); font-weight:800; margin-bottom:10px;
+}
+
+.challenge-q { font-size:16px; font-weight:700; color:var(--text); margin-bottom:14px; line-height:1.5; }
+
+.choices { display:flex; flex-direction:column; gap:8px; }
+
+.choice-btn {
+  padding:13px 16px; border-radius:14px;
+  border:2.5px solid rgba(26,111,186,0.15);
+  background:white; font-family:'Nunito',sans-serif;
+  font-size:15px; font-weight:600; cursor:pointer; text-align:left;
+  display:flex; align-items:center; gap:12px;
+  transition:all 0.2s; color:var(--text);
+}
+
+.choice-btn:hover:not(.done) { border-color:var(--orange); background:rgba(234,88,12,0.04); transform:translateX(4px); }
+.choice-btn.selected-correct { border-color:var(--correct); background:rgba(76,175,80,0.07); animation:correctBounce 0.4s cubic-bezier(0.34,1.56,0.64,1); }
+.choice-btn.selected-wrong { border-color:var(--wrong); background:rgba(224,122,95,0.07); animation:wrongWiggle 0.4s ease; }
+.choice-btn.show-answer { border-color:var(--correct); background:rgba(76,175,80,0.04); }
+.choice-btn.done { pointer-events:none; }
+
+@keyframes correctBounce { 0%{transform:scale(1);} 40%{transform:scale(1.03);} 100%{transform:scale(1);} }
+@keyframes wrongWiggle { 0%,100%{transform:translateX(0);} 25%{transform:translateX(-6px);} 75%{transform:translateX(6px);} }
+
+.choice-icon {
+  width:26px; height:26px; border-radius:8px;
+  background:rgba(234,88,12,0.08);
+  display:flex; align-items:center; justify-content:center;
+  font-size:11px; font-weight:800; flex-shrink:0;
+  color:var(--orange); font-family:'Nunito',sans-serif;
+}
+
+.choice-btn.selected-correct .choice-icon { background:var(--correct); color:white; }
+.choice-btn.selected-wrong .choice-icon { background:var(--wrong); color:white; }
+.choice-btn.show-answer .choice-icon { background:rgba(76,175,80,0.2); color:var(--correct); }
+
+/* ── FEEDBACK ── */
+.feedback-panel {
+  background:white; border-radius:var(--radius); padding:18px 20px;
+  margin-bottom:14px; border:2px solid; display:none;
+  animation:fadeUp 0.3s ease;
+}
+@keyframes fadeUp { from{opacity:0;transform:translateY(8px);} to{opacity:1;transform:translateY(0);} }
+.feedback-panel.show { display:block; }
+.feedback-panel.ok { border-color:var(--correct); }
+.feedback-panel.bad { border-color:var(--wrong); }
+.feedback-header { font-size:16px; font-weight:800; margin-bottom:8px; }
+.feedback-panel.ok .feedback-header { color:var(--correct); }
+.feedback-panel.bad .feedback-header { color:var(--wrong); }
+.feedback-body { font-size:14px; color:var(--muted); line-height:1.75; }
+.feedback-body strong { color:var(--text); }
+.feedback-body .gw { color:var(--sky); font-weight:700; }
+
+/* ── ACTIONS ── */
+.action-row { display:flex; gap:10px; margin-bottom:14px; }
+
+.btn-continue {
+  flex:1; padding:15px;
+  background:linear-gradient(135deg,var(--orange),#dc2626);
+  border:none; border-radius:100px; color:white;
+  font-family:'Nunito',sans-serif; font-size:15px; font-weight:800;
+  cursor:pointer; transition:transform 0.2s;
+  box-shadow:0 4px 16px rgba(234,88,12,0.35); display:none;
+}
+.btn-continue.show { display:block; }
+.btn-continue:hover { transform:translateY(-2px); }
+
+.btn-skip {
+  padding:15px 18px; background:transparent;
+  border:2px solid rgba(26,111,186,0.2); border-radius:100px;
+  color:var(--muted); font-family:'Nunito',sans-serif;
+  font-size:13px; font-weight:700; cursor:pointer; transition:all 0.2s;
+}
+.btn-skip:hover { border-color:var(--sky); color:var(--sky); }
+
+/* ── VOCAB BANK ── */
+.vocab-bank-toggle {
+  width:100%; padding:12px 20px;
+  background:rgba(255,255,255,0.72);
+  border:2px solid rgba(255,255,255,0.8); border-radius:100px;
+  font-family:'Nunito',sans-serif; font-size:13px; font-weight:700;
+  cursor:pointer; color:var(--sky); margin-bottom:14px;
+  transition:all 0.2s; backdrop-filter:blur(10px);
+}
+.vocab-bank-toggle:hover { background:rgba(255,255,255,0.9); }
+
+.vocab-bank {
+  background:var(--card); border-radius:var(--radius);
+  padding:18px; margin-bottom:14px;
+  box-shadow:0 4px 16px rgba(0,0,0,0.07);
+  display:none; max-height:280px; overflow-y:auto;
+}
+.vocab-bank.show { display:block; }
+.vocab-bank-title { font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--sky); font-weight:700; margin-bottom:10px; }
+
+.bank-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+.bank-item { padding:8px 10px; background:white; border-radius:10px; border:1px solid rgba(26,111,186,0.1); }
+.bank-item .bk-greek { color:var(--sky); font-weight:700; display:block; font-size:14px; }
+.bank-item .bk-eng { color:var(--muted); font-size:11px; }
+
+/* ── END ── */
+#screen-end {
+  display:none; flex-direction:column; align-items:center;
+  min-height:100vh; padding:40px 20px; text-align:center;
+}
+
+.end-card {
+  background:var(--card); border-radius:var(--radius);
+  padding:36px 26px; max-width:480px; width:100%;
+  box-shadow:0 20px 60px rgba(0,0,0,0.18);
+}
+
+.end-big { font-size:80px; margin-bottom:12px; animation:endPop 0.6s cubic-bezier(0.34,1.56,0.64,1); }
+@keyframes endPop { from{transform:scale(0) rotate(-15deg);} to{transform:scale(1) rotate(0);} }
+
+.end-title { font-family:'Architects Daughter',cursive; font-size:28px; color:var(--orange); margin-bottom:8px; }
+.end-sub { font-size:14px; color:var(--muted); margin-bottom:22px; line-height:1.7; }
+
+.words-learned {
+  background:linear-gradient(135deg,#f0fff4,#e8f5e9);
+  border:2px solid rgba(76,175,80,0.3); border-radius:16px;
+  padding:18px; margin-bottom:18px; text-align:left;
+}
+.words-learned-title { font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--correct); font-weight:800; margin-bottom:10px; }
+.words-list { display:flex; flex-wrap:wrap; gap:6px; }
+.word-pill { padding:5px 12px; background:white; border-radius:100px; border:2px solid rgba(76,175,80,0.3); font-size:13px; font-weight:700; color:var(--sky); }
+
+.replay-btn {
+  width:100%; padding:15px;
+  background:linear-gradient(135deg,var(--orange),#dc2626);
+  border:none; border-radius:100px; color:white;
+  font-family:'Nunito',sans-serif; font-size:16px; font-weight:800;
+  cursor:pointer; box-shadow:0 6px 20px rgba(234,88,12,0.4);
+  transition:transform 0.2s;
+}
+.replay-btn:hover { transform:translateY(-2px); }
+
+/* ── TOAST ── */
+.toast {
+  position:fixed; bottom:28px; left:50%;
+  transform:translateX(-50%) translateY(20px);
+  background:var(--text); color:white;
+  padding:11px 22px; border-radius:100px;
+  font-size:14px; font-weight:700; opacity:0;
+  transition:all 0.3s; z-index:100;
+  white-space:nowrap; pointer-events:none;
+}
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+@media (max-width:480px) {
+  .bank-grid { grid-template-columns:1fr; }
+  .scene-image-bar { gap:10px; }
+}
+</style>
+</head>
+<body>
+
+<div class="scene">
+  <div class="sun"></div>
+  <div class="cloud c1"></div>
+  <div class="cloud c2"></div>
+  <div class="cloud c3"></div>
+  <div class="sea-layer">
+    <div class="wave"></div>
+    <div class="wave wave2"></div>
+  </div>
+  <div class="buildings" id="buildings"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="app">
+
+<!-- ══════════ INTRO ══════════ -->
+<div id="screen-intro">
+  <div class="title-card">
+    <div class="day-badge">🌅 Day Two</div>
+    <div class="game-title">Μέρα Δύο —<br>The Real Work Begins</div>
+    <div class="game-tagline">Yesterday you survived. Today you actually have to set up your life. The internet won't install itself. Unfortunately.</div>
+
+    <div class="recap-box">
+      <div class="recap-title">📖 Day 1 recap — you already know</div>
+      <ul class="recap-list">
+        <li>👋 Greetings, γεια σου, καλημέρα, τα λέμε</li>
+        <li>🏠 Apartment vocab, κλειδί, όροφος, πρόβλημα</li>
+        <li>☕ Ordering at a café, παρακαλώ, πόσο κάνει</li>
+        <li>🛒 Supermarket basics, φτηνό, ακριβό</li>
+        <li>🚇 Transport, πού είναι, ευθεία, αριστερά</li>
+        <li>🍺 Social Greek, παρέα, φεύγω, τα λέμε</li>
+      </ul>
+    </div>
+
+    <div class="character-row">
+      <div class="char-bubble">
+        <div class="char-avatar nikos">👨‍🦱</div>
+        <div class="char-name">Nikos</div>
+      </div>
+      <div class="char-bubble">
+        <div class="char-avatar sofia">👩‍🦰</div>
+        <div class="char-name">Sofia</div>
+      </div>
+      <div class="char-bubble">
+        <div class="char-avatar kyrios">👨‍🦳</div>
+        <div class="char-name">Kyrios<br>Petros</div>
+      </div>
+      <div class="char-bubble">
+        <div class="char-avatar elektra">👩‍💼</div>
+        <div class="char-name">Elektra<br><span class="new-char-badge">NEW</span></div>
+      </div>
+    </div>
+
+    <div class="intro-text">
+      Meet <strong>Elektra</strong> — the DEH (electricity company) employee who has seen it all and is mildly irritated by all of it. She will help you. Eventually.<br><br>
+      Nikos has opinions about internet providers. Sofia has already told the whole neighbourhood you're trying to set up your life. Kyrios Petros will say αύριο at least twice.
+    </div>
+
+    <button class="start-btn" onclick="startGame()">Πάμε! Day Two →</button>
+  </div>
+</div>
+
+<!-- ══════════ GAME ══════════ -->
+<div id="screen-game">
+
+  <div class="chapter-header">
+    <div class="chapter-tag" id="chapter-tag">Chapter 1</div>
+    <div class="chapter-progress" id="chapter-progress"></div>
+    <div class="vocab-count" id="vocab-count">📖 0 words</div>
+  </div>
+
+  <div class="scene-card" id="scene-card">
+    <div class="scene-image-bar">
+      <div class="speaking-char">
+        <div class="char-face" id="char-face">👨‍🦱</div>
+        <div class="char-speaking-name" id="char-name">NIKOS</div>
+      </div>
+      <div class="speech-bubble">
+        <div class="greek-line" id="speech-greek"></div>
+        <div class="phonetic" id="speech-phonetic"></div>
+        <div class="translation" id="speech-translation"></div>
+      </div>
+    </div>
+    <div class="scene-context" id="scene-context"></div>
+  </div>
+
+  <div class="vocab-spotlight" id="vocab-spotlight">
+    <div class="vocab-title">📚 New words — tap each one to reveal</div>
+    <div class="vocab-items" id="vocab-items"></div>
+  </div>
+
+  <div class="grammar-aside" id="grammar-aside" style="display:none">
+    <div class="grammar-aside-label">⚡ Quick grammar note</div>
+    <div id="grammar-text"></div>
+  </div>
+
+  <div class="challenge-card" id="challenge-card">
+    <div class="challenge-label">🎯 Your turn</div>
+    <div class="challenge-q" id="challenge-q"></div>
+    <div class="choices" id="choices"></div>
+  </div>
+
+  <div class="feedback-panel" id="feedback-panel">
+    <div class="feedback-header" id="feedback-header"></div>
+    <div class="feedback-body" id="feedback-body"></div>
+  </div>
+
+  <div class="action-row">
+    <button class="btn-continue" id="btn-continue" onclick="nextScene()">Continue →</button>
+    <button class="btn-skip" onclick="skipScene()">Skip scene</button>
+  </div>
+
+  <button class="vocab-bank-toggle" onclick="toggleBank()">📖 Word bank (<span id="bank-count">0</span> words)</button>
+  <div class="vocab-bank" id="vocab-bank">
+    <div class="vocab-bank-title">Everything you've picked up</div>
+    <div class="bank-grid" id="bank-grid"></div>
+  </div>
+
+</div>
+
+<!-- ══════════ END ══════════ -->
+<div id="screen-end">
+  <div class="end-card">
+    <div class="end-big" id="end-big">🏠</div>
+    <div class="end-title">Μέρα Δύο — Done!</div>
+    <div class="end-sub" id="end-sub">The internet is (probably) connected. The electricity is (possibly) on. You're basically Greek now.</div>
+    <div class="words-learned">
+      <div class="words-learned-title">🧠 New words from today</div>
+      <div class="words-list" id="words-list"></div>
+    </div>
+    <button class="replay-btn" onclick="startGame()">Play again 🎲</button>
+  </div>
+</div>
+
+</div>
+
+<script>
+const SCENES = [
+
+  // ══ CHAPTER 1: MORNING COFFEE + PLANNING THE DAY ══════
+  {
+    chapter:"Chapter 1 — Πρωινό. Morning Briefing",
+    char:{ face:"👩‍🦰", name:"SOFIA", cls:"sofia" },
+    greek:"Καλημέρα! Φραπέ; Φαίνεσαι χαμένος/η.",
+    phonetic:"Ka-li-MEH-ra! Fra-PEH? FEH-neh-seh ha-MEH-nos/i.",
+    translation:"Good morning! Frappé? You look lost.",
+    context:"<strong>7 Kalamiotou Street, the kafeneio.</strong> Sofia has already made your frappé. She knew.",
+    grammar: null,
+    vocab:[
+      {emoji:"😵",greek:"χαμένος/η",phonetic:"ha-MEH-nos/i",english:"lost / confused (m/f)"},
+      {emoji:"📋",greek:"λίστα",phonetic:"LEE-sta",english:"list"},
+      {emoji:"📅",greek:"ραντεβού",phonetic:"ran-deh-VOO",english:"appointment"},
+      {emoji:"🔌",greek:"σύνδεση",phonetic:"SEEN-deh-si",english:"connection (internet / utility)"},
+      {emoji:"⏰",greek:"νωρίς",phonetic:"no-REES",english:"early (you know this one!)"},
+    ],
+    challenge:{
+      q:"Sofia asks what you need to do today. You tell her you have appointments to set up electricity and internet.",
+      options:[
+        {text:"Έχω ραντεβού για το ρεύμα και το ίντερνετ 📋", correct:true, response:"Sofia nods approvingly. 'Πρώτα το ρεύμα. Μετά το ίντερνετ. After that — frappé.' She has a system for everything."},
+        {text:"I need to sort electricity today! ⚡", correct:false, response:"Sofia sighs with deep theatrical regret. She points at you. 'Ελληνικά.' She waits."},
+        {text:"Δεν ξέρω... πολλά πράγματα 😅", correct:false, response:"'Πολλά πράγματα' (many things) — she accepts this. It's relatable. She makes you a second frappé on the house."},
+      ],
+      explanation:"<span class='gw'>Έχω ραντεβού</span> = I have an appointment. <span class='gw'>Το ρεύμα</span> = electricity. <span class='gw'>Το ίντερνετ</span> = internet (yes, same word). <span class='gw'>Πρώτα... μετά...</span> = First... then... — incredibly useful for explaining your plans."
+    }
+  },
+
+  // ══ CHAPTER 2: ELECTRICITY COMPANY ══════════════════
+  {
+    chapter:"Chapter 2 — ΔΕΗ. Electricity Office",
+    char:{ face:"👩‍💼", name:"ELEKTRA (ΔΕΗ)", cls:"elektra" },
+    greek:"Αριθμός παροχής, παρακαλώ.",
+    phonetic:"A-rith-MOS pa-ro-HIS, pa-ra-ka-LO.",
+    translation:"Supply number, please.",
+    context:"<strong>The electricity company office.</strong> Elektra has the energy of someone who has answered this question 400 times today. The number is on a sticker inside your meter cabinet. You did not know this.",
+    grammar:"<strong>Παρακαλώ</strong> does triple duty in Greek: it means <span class='eg'>please</span>, <span class='eg'>you're welcome</span>, and also <span class='eg'>go ahead / yes?</span> when someone knocks or calls. Context is everything.",
+    vocab:[
+      {emoji:"🔢",greek:"αριθμός παροχής",phonetic:"a-rith-MOS pa-ro-HIS",english:"supply number (on your meter)"},
+      {emoji:"📄",greek:"συμβόλαιο",phonetic:"sim-VO-leh-o",english:"contract"},
+      {emoji:"🪪",greek:"ταυτότητα",phonetic:"taf-TO-ti-ta",english:"ID / identity card"},
+      {emoji:"🧾",greek:"λογαριασμός",phonetic:"lo-ga-ria-SMOS",english:"bill / account (you saw this in Day 1!)"},
+      {emoji:"✍️",greek:"υπογράφω",phonetic:"i-po-GRA-fo",english:"I sign"},
+      {emoji:"📬",greek:"διεύθυνση",phonetic:"di-EF-thin-si",english:"address"},
+    ],
+    challenge:{
+      q:"Elektra asks for your ID. You hand it over and want to ask how long the contract is for.",
+      options:[
+        {text:"Ορίστε. Για πόσο καιρό είναι το συμβόλαιο; 📄", correct:true, response:"Elektra blinks. Twice. 'Ένα χρόνο.' (One year.) She seems almost impressed that you tried. Almost."},
+        {text:"Here is my ID — how long is the contract?", correct:false, response:"Elektra looks at the ID, then at you, then says slowly: 'Ένα χρόνο.' She does not acknowledge the English."},
+        {text:"Ορίστε η ταυτότητά μου! ✅", correct:false, response:"Perfect! But you forgot to ask about the contract. Elektra processes everything and hands you a 4-page document. You sign it. You do not know what's in it."},
+      ],
+      explanation:"<span class='gw'>Ορίστε</span> = here you go (handing something). <span class='gw'>Για πόσο καιρό;</span> = For how long? <span class='gw'>Ένα χρόνο</span> = one year. <span class='gw'>Έξι μήνες</span> = six months. These are essential for any contract or rental situation."
+    }
+  },
+
+  // ══ CHAPTER 3: INTERNET PROVIDER ════════════════════
+  {
+    chapter:"Chapter 3 — Ίντερνετ. The Internet Saga",
+    char:{ face:"👨‍🦱", name:"NIKOS", cls:"nikos" },
+    greek:"Όχι ΕΚΕΙΝΗ την εταιρεία! Είναι τρομερή! Πάρε Cosmote!",
+    phonetic:"O-hi e-KEE-ni tin e-teh-REE-a! EE-neh tro-meh-RI! PA-reh Cosmote!",
+    translation:"NOT that company! It's terrible! Get Cosmote!",
+    context:"Nikos has very strong internet provider opinions. He has been waiting to share them. He intercepts you before you even reach the shop.",
+    grammar:"<strong>Πάρε</strong> is the informal command form of <span class='eg'>παίρνω</span> (to take/get). Commands in Greek drop the ending: <span class='eg'>Πάρε!</span> = Take it! Get it! <span class='eg'>Έλα!</span> = Come! <span class='eg'>Πες μου!</span> = Tell me! You'll hear these constantly.",
+    vocab:[
+      {emoji:"📡",greek:"ίντερνετ / wifi",phonetic:"IN-ter-net / WI-fi",english:"internet / wifi (same words)"},
+      {emoji:"🏢",greek:"εταιρεία",phonetic:"e-teh-REE-a",english:"company"},
+      {emoji:"😤",greek:"τρομερός/ή",phonetic:"tro-meh-ROS/i",english:"terrible / dreadful"},
+      {emoji:"📶",greek:"σύνδεση",phonetic:"SEEN-deh-si",english:"connection"},
+      {emoji:"💸",greek:"πακέτο",phonetic:"pa-KEH-to",english:"package / deal"},
+      {emoji:"📞",greek:"κινητό",phonetic:"ki-ni-TO",english:"mobile phone"},
+    ],
+    challenge:{
+      q:"You're in the internet shop. You want to ask what packages they have and what the monthly cost is.",
+      options:[
+        {text:"Τι πακέτα έχετε; Πόσο κοστίζει το μήνα; 📶", correct:true, response:"The shop assistant lights up and presents six options in rapid Greek. You understand 'wifi', 'κινητό', and a number. You pick one. Nikos would be proud."},
+        {text:"What packages do you have? Monthly cost?", correct:false, response:"They speak enough English to help. But Nikos, who has somehow followed you, shakes his head slowly from outside the window."},
+        {text:"Έχετε καλό ίντερνετ; (Do you have good internet?)", correct:false, response:"The assistant says 'Ναι, βεβαίως!' (Yes, of course!) — they all say this. You need specifics. Try again with prices."},
+      ],
+      explanation:"<span class='gw'>Τι πακέτα έχετε;</span> = What packages do you have? <span class='gw'>Πόσο κοστίζει;</span> = How much does it cost? <span class='gw'>Το μήνα</span> = per month. <span class='gw'>Πότε εγκαθίσταται;</span> = When will it be installed? — that last one is advanced but worth memorising."
+    }
+  },
+
+  // ══ CHAPTER 4: KYRIOS PETROS + REPAIRS ══════════════
+  {
+    chapter:"Chapter 4 — Επισκευές. Repairs",
+    char:{ face:"👨‍🦳", name:"KYRIOS PETROS", cls:"kyrios" },
+    greek:"Το μπόιλερ; Α ναι... Θα έρθω αύριο.",
+    phonetic:"To BOI-ler? A neh... Tha EL-tho AV-rio.",
+    translation:"The boiler? Ah yes... I'll come tomorrow.",
+    context:"<strong>The hot water is still not working.</strong> This is Day Two. Kyrios Petros says αύριο with the confidence of a man for whom tomorrow has unlimited capacity.",
+    grammar:"<span class='eg'>Αύριο</span> means tomorrow — but in Greek contractor/landlord culture, αύριο is a flexible concept. It can mean tomorrow, this week, eventually, or perhaps never. <span class='eg'>Πότε ακριβώς;</span> (When exactly?) is a phrase worth knowing.",
+    vocab:[
+      {emoji:"🚿",greek:"μπόιλερ",phonetic:"BOI-ler",english:"boiler / water heater"},
+      {emoji:"🔧",greek:"επισκευή",phonetic:"e-pi-skeh-VI",english:"repair"},
+      {emoji:"🪛",greek:"υδραυλικός",phonetic:"i-drav-li-KOS",english:"plumber"},
+      {emoji:"⚡",greek:"ηλεκτρολόγος",phonetic:"i-lek-tro-LO-gos",english:"electrician"},
+      {emoji:"📅",greek:"πότε ακριβώς;",phonetic:"PO-teh a-kri-VOS",english:"when exactly?"},
+      {emoji:"⚠️",greek:"επείγον",phonetic:"e-PEE-gon",english:"urgent"},
+    ],
+    challenge:{
+      q:"You need to push back. The boiler is urgent — you have no hot water. How do you make this clear?",
+      options:[
+        {text:"Είναι επείγον — δεν έχω ζεστό νερό καθόλου 🚿", correct:true, response:"Kyrios Petros pauses. 'Καθόλου;' (None at all?) He looks genuinely concerned. He pulls out his phone. He calls someone. It might actually happen today. Miracle."},
+        {text:"Tomorrow is not okay! I need hot water! 😤", correct:false, response:"Kyrios Petros smiles patiently and says 'Εντάξει, εντάξει.' He means nothing by it. Nothing will happen."},
+        {text:"Εντάξει, αύριο. 👍", correct:false, response:"You accepted αύριο. You will have cold showers until Friday. You have only yourself to blame."},
+      ],
+      explanation:"<span class='gw'>Καθόλου</span> = not at all / none at all — very emphatic. <span class='gw'>Είναι επείγον</span> = it's urgent. <span class='gw'>Δεν έχω [thing] καθόλου</span> = I have absolutely no [thing]. The word καθόλου is your friend whenever you need to emphasise a problem."
+    }
+  },
+
+  // ══ CHAPTER 5: MOVING BOXES ══════════════════════════
+  {
+    chapter:"Chapter 5 — Μετακόμιση. The Move",
+    char:{ face:"👨‍🦱", name:"NIKOS", cls:"nikos" },
+    greek:"Έχεις πολλά κουτιά! Πού τα βάζεις όλα;",
+    phonetic:"EH-hees po-LA koo-TYA! POO ta VA-zeis O-la?",
+    translation:"You have so many boxes! Where are you putting them all?",
+    context:"Your moving boxes have arrived. All 47 of them. Nikos is in the hallway being very helpful and also slightly in the way.",
+    grammar:"<span class='eg'>Βάζω</span> = I put / I place. It's one of the most useful everyday verbs: <span class='eg'>Βάλε το εδώ</span> = Put it here. <span class='eg'>Πού το βάζω;</span> = Where do I put it? You'll use this constantly while setting up a home.",
+    vocab:[
+      {emoji:"📦",greek:"κουτί / κουτιά",phonetic:"koo-TI / koo-TYA",english:"box / boxes"},
+      {emoji:"🛋️",greek:"έπιπλα",phonetic:"E-pi-pla",english:"furniture"},
+      {emoji:"🪟",greek:"παράθυρο",phonetic:"pa-RA-thi-ro",english:"window"},
+      {emoji:"🚪",greek:"πόρτα",phonetic:"POR-ta",english:"door"},
+      {emoji:"⬆️",greek:"επάνω",phonetic:"e-PA-no",english:"upstairs / up / on top"},
+      {emoji:"⬇️",greek:"κάτω",phonetic:"KA-to",english:"downstairs / down / below"},
+      {emoji:"🔨",greek:"βάζω",phonetic:"VA-zo",english:"I put / I place"},
+    ],
+    challenge:{
+      q:"The removal men ask where the sofa goes. You want to say: in the living room, next to the window.",
+      options:[
+        {text:"Στο σαλόνι, δίπλα στο παράθυρο 🛋️", correct:true, response:"They nod and carry it in. It doesn't fit. They try three different positions. It ends up exactly where you said. Success."},
+        {text:"Living room, by the window! 🏠", correct:false, response:"One of them speaks a little English. The sofa ends up in approximately the right place. Approximately."},
+        {text:"Εδώ! Εδώ! 📍", correct:false, response:"You pointed and said 'here' repeatedly. They put it directly in the hallway doorway. You clarify. It takes 20 minutes."},
+      ],
+      explanation:"<span class='gw'>Σαλόνι</span> = living room. <span class='gw'>Κουζίνα</span> = kitchen. <span class='gw'>Υπνοδωμάτιο</span> = bedroom. <span class='gw'>Μπάνιο</span> = bathroom. <span class='gw'>Δίπλα σε</span> = next to. <span class='gw'>Μπροστά από</span> = in front of. <span class='gw'>Πίσω από</span> = behind. These six room names + three position words = total moving-day control."
+    }
+  },
+
+  // ══ CHAPTER 6: IKEA / FURNITURE SHOPPING ════════════
+  {
+    chapter:"Chapter 6 — Έπιπλα. Furniture Run",
+    char:{ face:"👩‍🦰", name:"SOFIA", cls:"sofia" },
+    greek:"Χρειάζεσαι έπιπλα; Ξέρω ένα μαγαζί — φτηνό και καλό!",
+    phonetic:"hria-ZEH-seh E-pi-pla? KSEH-ro EH-na ma-ga-ZI — fti-NO ke ka-LO!",
+    translation:"You need furniture? I know a shop — cheap and good!",
+    context:"Sofia knows a place. Of course she does. Her cousin owns it. Of course he does.",
+    grammar:"<span class='eg'>Χρειάζομαι</span> = I need — a reflexive verb (ends in -ομαι). It works differently: <span class='eg'>Χρειάζομαι έναν καναπέ</span> = I need a sofa. No 'να' needed here — just χρειάζομαι + the thing directly.",
+    vocab:[
+      {emoji:"🛏️",greek:"κρεβάτι",phonetic:"kreh-VA-ti",english:"bed"},
+      {emoji:"🛋️",greek:"καναπές",phonetic:"ka-na-PES",english:"sofa"},
+      {emoji:"🪑",greek:"καρέκλα",phonetic:"ka-REK-la",english:"chair"},
+      {emoji:"🪞",greek:"καθρέφτης",phonetic:"ka-THREF-tis",english:"mirror"},
+      {emoji:"💡",greek:"λάμπα",phonetic:"LAM-pa",english:"lamp"},
+      {emoji:"🧴",greek:"σαπούνι",phonetic:"sa-POO-ni",english:"soap"},
+      {emoji:"🛒",greek:"χρειάζομαι",phonetic:"hria-ZO-meh",english:"I need"},
+    ],
+    challenge:{
+      q:"You're in the shop. You need a bed, a lamp, and some hangers. How do you ask if they have all three?",
+      options:[
+        {text:"Έχετε κρεβάτι, λάμπα, και κρεμάστρες; 🛏️💡", correct:true, response:"The shop owner beams and leads you on a 45-minute tour. You come out with a bed, two lamps, a mirror, a rug, and some candles. Sofia's cousin is very good at his job."},
+        {text:"Do you have beds? And lamps?", correct:false, response:"He understands. But then switches to Greek anyway because he's excited about showing you things. You needed Greek after all."},
+        {text:"Χρειάζομαι πολλά πράγματα... 😅", correct:false, response:"'Many things' — he nods enthusiastically. An hour later you're not sure what you bought but your receipt is very long."},
+      ],
+      explanation:"<span class='gw'>Έχετε...;</span> = Do you have...? — the most useful shopping question. <span class='gw'>Κρεμάστρα / κρεμάστρες</span> = hanger/s. <span class='gw'>Μπορώ να το δω;</span> = Can I see it? <span class='gw'>Έχετε σε άλλο χρώμα;</span> = Do you have it in another colour? Three phrases that unlock any shop."
+    }
+  },
+
+  // ══ CHAPTER 7: TAVERNA DINNER ════════════════════════
+  {
+    chapter:"Chapter 7 — Ταβέρνα. First Real Dinner Out",
+    char:{ face:"👨‍🦱", name:"NIKOS", cls:"nikos" },
+    greek:"Άκου — παραγγέλνουμε εγώ. Εμπιστεύεσαι με;",
+    phonetic:"A-koo — pa-ra-GEL-noo-meh e-GO. em-bis-TEV-eh-seh meh?",
+    translation:"Listen — I'll order. Do you trust me?",
+    context:"<strong>A taverna in the Monastiraki neighbourhood.</strong> Nikos has brought the whole παρέα. The menu is only in Greek. This is fine. This is great actually.",
+    grammar:"<span class='eg'>Εμπιστεύεσαι με;</span> = Do you trust me? Notice: <span class='eg'>με</span> = me (object). Word order in Greek is very flexible — the verb often comes first. Don't stress about getting it perfect; Greeks understand even scrambled sentences.",
+    vocab:[
+      {emoji:"🥗",greek:"μεζέδες",phonetic:"meh-ZEH-des",english:"small shared dishes (mezze)"},
+      {emoji:"🧆",greek:"κεφτέδες",phonetic:"kef-TEH-des",english:"meatballs (Greek style)"},
+      {emoji:"🫒",greek:"ταραμοσαλάτα",phonetic:"ta-ra-mo-sa-LA-ta",english:"taramasalata (fish roe dip)"},
+      {emoji:"🍷",greek:"κρασί της βαρέλας",phonetic:"kra-SI tis va-REH-las",english:"house wine (from the barrel)"},
+      {emoji:"🍞",greek:"ψωμί",phonetic:"pso-MI",english:"bread (you know this one!)"},
+      {emoji:"😋",greek:"νόστιμος/η",phonetic:"NOS-ti-mos/i",english:"tasty / delicious"},
+      {emoji:"👏",greek:"μπράβο!",phonetic:"BRA-vo",english:"well done! / bravo!"},
+    ],
+    challenge:{
+      q:"The food arrives. Everything is incredible. The waiter asks 'Είναι όλα εντάξει;' (Is everything okay?). You want to say it's all delicious.",
+      options:[
+        {text:"Ναι! Όλα είναι πολύ νόστιμα! 😋", correct:true, response:"The waiter grins. The whole table cheers. Nikos looks smug. A second bottle of barrel wine appears from nowhere."},
+        {text:"Yes, delicious! Very good! 👍", correct:false, response:"He understands and smiles. But Nikos nudges you. 'Say it in Greek. Say νόστιμο.' He won't let it go."},
+        {text:"Εντάξει! 👌", correct:false, response:"'Εντάξει' means 'okay' — adequate praise for extraordinary food. Nikos is personally offended on behalf of the taverna."},
+      ],
+      explanation:"<span class='gw'>Νόστιμος/νόστιμη/νόστιμο</span> = delicious (changes ending for gender). <span class='gw'>Πολύ ωραίο</span> = very nice. <span class='gw'>Το καλύτερο που έχω φάει</span> = the best I've ever eaten (advanced but devastating in a good way). Greeks appreciate food compliments enormously. Use them freely."
+    }
+  },
+
+  // ══ CHAPTER 8: BUREAUCRACY / ΚΕΠ ═══════════════════
+  {
+    chapter:"Chapter 8 — Γραφειοκρατία. The Government Office",
+    char:{ face:"👩‍💼", name:"ELEKTRA (ΚΕΠ)", cls:"elektra" },
+    greek:"Χρειάζεστε ΑΦΜ; Έχετε φωτοαντίγραφο της ταυτότητας;",
+    phonetic:"hria-ZES-teh a-fi-MI? EH-heh-teh fo-to-AN-di-gra-fo tis taf-TO-ti-tas?",
+    translation:"Do you need a tax number? Do you have a photocopy of your ID?",
+    context:"<strong>The ΚΕΠ — Citizen Service Centre.</strong> Elektra works here too, apparently. Or her twin does. You need an ΑΦΜ (tax number) to do basically anything in Greece — open a bank account, sign a lease, breathe.",
+    grammar:"<span class='eg'>Χρειάζεστε</span> = you need (formal/plural form of χρειάζομαι). When speaking to officials, use <span class='eg'>εσείς</span> (formal you) — the verb ends in <span class='eg'>-ετε / -εστε</span>. It's like the difference between tu and vous in French.",
+    vocab:[
+      {emoji:"🔢",greek:"ΑΦΜ",phonetic:"a-fi-MI",english:"tax number (everyone needs this)"},
+      {emoji:"📄",greek:"φωτοαντίγραφο",phonetic:"fo-to-AN-di-gra-fo",english:"photocopy"},
+      {emoji:"🏦",greek:"τράπεζα",phonetic:"TRA-peh-za",english:"bank (you know this one!)"},
+      {emoji:"📝",greek:"αίτηση",phonetic:"EH-ti-si",english:"application / form"},
+      {emoji:"🖊️",greek:"συμπληρώνω",phonetic:"sim-bli-RO-no",english:"I fill in (a form)"},
+      {emoji:"⏳",greek:"θα αργήσει",phonetic:"tha ar-YEE-si",english:"it will take a while"},
+    ],
+    challenge:{
+      q:"You don't have a photocopy. You ask if there's a photocopy machine nearby.",
+      options:[
+        {text:"Έχετε φωτοτυπικό εδώ; Ή πού μπορώ να βρω; 📄", correct:true, response:"Elektra points to a machine in the corner. It costs 20 cents. You didn't have 20 cents. The man behind you gives you 20 cents. This is Greece."},
+        {text:"I don't have a photocopy. Is there a machine?", correct:false, response:"Elektra points to the corner anyway. She's seen this before. Many times."},
+        {text:"Δεν έχω... λυπάμαι 😬", correct:false, response:"You said 'I don't have it... I'm sorry.' Elektra says 'Εκεί' (over there) and points. The machine was there the whole time."},
+      ],
+      explanation:"<span class='gw'>Φωτοτυπικό</span> = photocopier. <span class='gw'>Έχετε...;</span> = Do you have...? <span class='gw'>Πού μπορώ να βρω...;</span> = Where can I find...? This second phrase is one of the most useful in any bureaucratic or urban situation. Memorise it."
+    }
+  },
+
+  // ══ CHAPTER 9: BANK ACCOUNT ══════════════════════════
+  {
+    chapter:"Chapter 9 — Τράπεζα. Opening a Bank Account",
+    char:{ face:"👤", name:"BANK CLERK", cls:"stranger" },
+    greek:"Θέλετε να ανοίξετε λογαριασμό; Έχετε ΑΦΜ;",
+    phonetic:"THEH-leh-teh na a-NEE-kse-teh lo-ga-ria-SMO? EH-heh-teh a-fi-MI?",
+    translation:"You want to open an account? Do you have a tax number?",
+    context:"<strong>The bank.</strong> You have your ΑΦΜ. You have your ID. You have your photocopy. You are prepared. You feel powerful.",
+    grammar:"<span class='eg'>Θέλετε να ανοίξετε</span> = Do you want to open — notice <span class='eg'>να + closed stem</span> again: <span class='eg'>ανοίξετε</span> from <span class='eg'>ανοίγω</span>. This is the subjunctive you learned about. After <span class='eg'>θέλω να</span>, the verb always takes the closed form.",
+    vocab:[
+      {emoji:"🏦",greek:"λογαριασμός",phonetic:"lo-ga-ria-SMOS",english:"account / bill"},
+      {emoji:"💳",greek:"κάρτα",phonetic:"KAR-ta",english:"card"},
+      {emoji:"💶",greek:"μετρητά",phonetic:"met-ri-TA",english:"cash"},
+      {emoji:"📲",greek:"mobile banking",phonetic:"MO-bile BAN-king",english:"mobile banking (same term)"},
+      {emoji:"🔐",greek:"κωδικός",phonetic:"ko-di-KOS",english:"password / PIN / code"},
+      {emoji:"💸",greek:"μεταφορά",phonetic:"meh-ta-fo-RA",english:"transfer"},
+    ],
+    challenge:{
+      q:"The clerk asks if you want a debit or credit card. You want debit, and you want to set up mobile banking.",
+      options:[
+        {text:"Χρεωστική κάρτα, παρακαλώ. Και mobile banking — είναι δυνατόν; 💳", correct:true, response:"The clerk nods and pulls out a long form. You fill it in. Your hand hurts. But you have a Greek bank account. You are now basically a resident."},
+        {text:"Debit card please, and mobile banking!", correct:false, response:"He switches to English. It works fine. But you had the words — use them next time."},
+        {text:"Ναι, θέλω κάρτα! 💳", correct:false, response:"He asks 'Χρεωστική ή πιστωτική;' (Debit or credit?). You stare. These words will now haunt you. Χρεωστική = debit. Πιστωτική = credit."},
+      ],
+      explanation:"<span class='gw'>Χρεωστική κάρτα</span> = debit card. <span class='gw'>Πιστωτική κάρτα</span> = credit card. <span class='gw'>Είναι δυνατόν;</span> = Is it possible? — a beautifully polite way to ask for something. <span class='gw'>Πόση ώρα θα πάρει;</span> = How long will it take? Useful for anything in Greece involving waiting, which is most things."
+    }
+  },
+
+  // ══ CHAPTER 10: NEIGHBOURS + BUILDING CHAT ══════════
+  {
+    chapter:"Chapter 10 — Γείτονες. Building Social Life",
+    char:{ face:"👨‍🦱", name:"NIKOS", cls:"nikos" },
+    greek:"Απόψε έχουμε σύσκεψη για το κτίριο — έρχεσαι;",
+    phonetic:"a-PO-pseh EH-hoo-meh SEES-kep-si ya to KTEE-ri-o — EHR-heh-seh?",
+    translation:"Tonight we have a building meeting — are you coming?",
+    context:"There is a building meeting. About the bins, apparently. Or the roof. Or someone's motorbike in the hallway. Nikos is very excited about it.",
+    grammar:"<span class='eg'>Έρχεσαι;</span> = Are you coming? — from <span class='eg'>έρχομαι</span> (to come), one of the -ομαι verbs. These are called reflexive or deponent verbs. Other common ones: <span class='eg'>κάθομαι</span> (I sit), <span class='eg'>σηκώνομαι</span> (I get up), <span class='eg'>αισθάνομαι</span> (I feel).",
+    vocab:[
+      {emoji:"🏢",greek:"κτίριο",phonetic:"KTEE-ri-o",english:"building"},
+      {emoji:"🗑️",greek:"σκουπίδια",phonetic:"skoo-PEE-dya",english:"rubbish / bins"},
+      {emoji:"🤝",greek:"συμφωνούμε",phonetic:"sim-fo-NOO-meh",english:"we agree"},
+      {emoji:"😤",greek:"παράπονο",phonetic:"pa-RA-po-no",english:"complaint"},
+      {emoji:"🔊",greek:"φωνές / θόρυβος",phonetic:"fo-NES / THO-ri-vos",english:"voices / noise"},
+      {emoji:"😴",greek:"ησυχία",phonetic:"i-si-HEE-a",english:"quiet / peace and quiet"},
+    ],
+    challenge:{
+      q:"At the meeting, someone complains about noise late at night (from you, perhaps). You want to apologise and say it won't happen again.",
+      options:[
+        {text:"Συγγνώμη — δεν θα ξανασυμβεί. 🙏", correct:true, response:"The neighbour softens immediately. Everyone nods. Nikos gives you a tiny thumbs up. The meeting moves on to the bins. You are now officially part of the building."},
+        {text:"Sorry! Sorry! It was just one night! 😅", correct:false, response:"Everyone understands sorry. But Nikos translates the rest for you. In front of everyone. In detail."},
+        {text:"Συγγνώμη! Δεν ήξερα! (I didn't know!)", correct:false, response:"Acceptable! Honest and polite. But 'it won't happen again' is stronger. You're getting there though."},
+      ],
+      explanation:"<span class='gw'>Συγγνώμη</span> = sorry / excuse me (essential word). <span class='gw'>Δεν θα ξανασυμβεί</span> = it won't happen again. <span class='gw'>Δεν ήξερα</span> = I didn't know. <span class='gw'>Θα προσέξω</span> = I'll be careful. In Greek neighbour culture, a sincere apology with eye contact goes a very long way."
+    }
+  },
+
+  // ══ CHAPTER 11: GYM / LOCAL CLASS ═══════════════════
+  {
+    chapter:"Chapter 11 — Γυμναστήριο. Finding a Gym",
+    char:{ face:"👩‍🦰", name:"SOFIA", cls:"sofia" },
+    greek:"Θέλεις γυμναστήριο; Ο αδερφός μου έχει γυμναστήριο!",
+    phonetic:"THEH-lis yim-nas-TEE-rio? O a-der-FOS moo EH-hi yim-nas-TEE-rio!",
+    translation:"You want a gym? My brother has a gym!",
+    context:"Of course he does. This is Greece. Everyone Sofia knows owns something. The brother's gym is apparently 'very professional' and 'very nice price for friends.'",
+    grammar:"<span class='eg'>Αδερφός</span> = brother. <span class='eg'>Αδερφή</span> = sister. Family words matter a lot in Greece — you'll hear them constantly. <span class='eg'>Ξάδερφος/η</span> = cousin. <span class='eg'>Θείος/θεία</span> = uncle/aunt. Someone's cousin is always available to fix/make/sell whatever you need.",
+    vocab:[
+      {emoji:"💪",greek:"γυμναστήριο",phonetic:"yim-nas-TEE-rio",english:"gym"},
+      {emoji:"🏊",greek:"πισίνα",phonetic:"pi-SEE-na",english:"swimming pool"},
+      {emoji:"🧘",greek:"γιόγκα",phonetic:"YO-ga",english:"yoga (same word)"},
+      {emoji:"📅",greek:"πρόγραμμα",phonetic:"PRO-gra-ma",english:"schedule / programme"},
+      {emoji:"💰",greek:"συνδρομή",phonetic:"sin-dro-MI",english:"membership / subscription"},
+      {emoji:"🕐",greek:"ωράριο",phonetic:"o-RA-rio",english:"opening hours"},
+    ],
+    challenge:{
+      q:"You want to ask what the monthly membership costs and what the opening hours are.",
+      options:[
+        {text:"Πόσο είναι η μηνιαία συνδρομή; Και ποιο είναι το ωράριο; 💪", correct:true, response:"The brother — Takis — shakes your hand for a long time. He tells you the price, the hours, and also gives you a tour, introduces you to three regulars, and offers you a protein shake. Welcome to your gym."},
+        {text:"How much per month? What are the hours?", correct:false, response:"Takis switches to enthusiastic broken English. It works. But Sofia, watching from the door, slowly shakes her head."},
+        {text:"Έχετε γιόγκα; 🧘", correct:false, response:"'Ναι! Τετάρτη και Παρασκευή!' Great — but you forgot to ask about price and hours. Takis will now assume you're signing up."},
+      ],
+      explanation:"<span class='gw'>Μηνιαία συνδρομή</span> = monthly membership. <span class='gw'>Ωράριο</span> = opening hours (also used for work schedules). <span class='gw'>Είναι ανοιχτό;</span> = Is it open? <span class='gw'>Πότε κλείνετε;</span> = When do you close? These work for any shop, gym, or office."
+    }
+  },
+
+  // ══ CHAPTER 12: END OF DAY TWO ═══════════════════════
+  {
+    chapter:"Chapter 12 — Τέλος Μέρας. End of Day Two",
+    char:{ face:"👩‍🦰", name:"SOFIA", cls:"sofia" },
+    greek:"Πώς ήταν η μέρα σου; Τα κατάφερες;",
+    phonetic:"POS EE-tan i MEH-ra soo? Ta ka-TA-feh-res?",
+    translation:"How was your day? Did you manage?",
+    context:"Back at the kafeneio. Your frappé is already made. Sofia already knows how your day went. She wants to hear it from you.",
+    grammar:"<span class='eg'>Τα κατάφερες;</span> = Did you manage? / Did you pull it off? — from <span class='eg'>καταφέρνω</span> (to manage/succeed). A very common Greek question when someone has had a challenging day. The answer is almost always: <span class='eg'>Ναι, τα κατάφερα!</span>",
+    vocab:[
+      {emoji:"😌",greek:"ανακούφιση",phonetic:"a-na-KOO-fi-si",english:"relief"},
+      {emoji:"🥱",greek:"κουρασμένος/η",phonetic:"koo-ras-MEH-nos/i",english:"tired (you know this!)"},
+      {emoji:"🌟",greek:"τα κατάφερα!",phonetic:"ta ka-TA-feh-ra",english:"I managed! / I did it!"},
+      {emoji:"😂",greek:"τελικά",phonetic:"te-li-KA",english:"in the end / finally / ultimately"},
+      {emoji:"🏠",greek:"σπίτι μου",phonetic:"SPI-ti moo",english:"my home"},
+      {emoji:"❤️",greek:"αγαπώ την Ελλάδα",phonetic:"a-ga-PO tin e-LA-da",english:"I love Greece"},
+    ],
+    challenge:{
+      q:"Sofia asks how your day was. You want to say: exhausting, but you managed everything. And the apartment is starting to feel like home.",
+      options:[
+        {text:"Κουραστικό, αλλά τα κατάφερα! Τελικά νιώθω σπίτι μου! 🏠", correct:true, response:"Sofia puts her hand on her heart. 'Αυτό!' (That's it!) Nikos appears from nowhere and applauds. Kyrios Petros walks past and nods. The boiler guy calls — he's coming tomorrow. Actually tomorrow this time. Probably. Καλωσόρισες στην Αθήνα. 🇬🇷",},
+        {text:"Very tired but good! Home now! 😴", correct:false, response:"Sofia understands and smiles warmly. But then she says: 'Say it in Greek.' She always says this. She always will."},
+        {text:"Εντάξει! Πολύ κουρασμένος/η! 😅", correct:false, response:"'Εντάξει' again. You survived but you undersold it. You moved to a new country today. You deserve better than εντάξει."},
+      ],
+      explanation:"<span class='gw'>Κουραστικό</span> = exhausting. <span class='gw'>Τα κατάφερα</span> = I managed it (one of the most satisfying phrases in Greek). <span class='gw'>Νιώθω σπίτι μου</span> = I feel at home. <span class='gw'>Καλωσόρισες</span> = welcome (said to someone who has arrived somewhere new). You'll hear this a lot. It's a beautiful word."
+    }
+  },
+
+];
+
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+let currentIdx = 0;
+let learnedWords = [];
+let vocabRevealed = [];
+let sceneOrder = [];
+let bankVisible = false;
+
+function startGame() {
+  sceneOrder = [...Array(SCENES.length).keys()].sort(() => Math.random()-0.5);
+  currentIdx = 0;
+  learnedWords = [];
+  vocabRevealed = [];
+  bankVisible = false;
+  showScreen('game');
+  buildBuildings();
+  renderScene();
+}
+
+function showScreen(id) {
+  ['intro','game','end'].forEach(s => {
+    const el = document.getElementById('screen-'+s);
+    if(s==='intro') el.style.display = id===s ? 'flex' : 'none';
+    else if(s==='game') el.style.display = id===s ? 'block' : 'none';
+    else el.style.display = id===s ? 'flex' : 'none';
+  });
+}
+
+function buildBuildings() {
+  const b = document.getElementById('buildings');
+  b.innerHTML='';
+  [70,110,55,130,85,105,65,120,80,95,60,140].forEach(h => {
+    const d = document.createElement('div');
+    d.className='building';
+    d.style.cssText=`width:35px;height:${h}px`;
+    for(let r=0;r<Math.floor(h/24);r++) for(let c=0;c<2;c++) {
+      const w=document.createElement('div');
+      w.className='win';
+      w.style.cssText=`width:9px;height:9px;left:${5+c*14}px;bottom:${6+r*20}px`;
+      d.appendChild(w);
+    }
+    b.appendChild(d);
+  });
+}
+
+function renderScene() {
+  const s = SCENES[sceneOrder[currentIdx]];
+
+  document.getElementById('chapter-tag').textContent = s.chapter;
+  document.getElementById('vocab-count').textContent = `📖 ${learnedWords.length} words`;
+
+  const prog = document.getElementById('chapter-progress');
+  prog.innerHTML = sceneOrder.map((_,i)=>`<div class="prog-dot${i<currentIdx?' done':i===currentIdx?' current':''}"></div>`).join('');
+
+  const cf = document.getElementById('char-face');
+  cf.textContent = s.char.face;
+  cf.className = 'char-face '+s.char.cls;
+  document.getElementById('char-name').textContent = s.char.name;
+
+  document.getElementById('speech-greek').textContent = s.greek;
+  document.getElementById('speech-phonetic').textContent = s.phonetic;
+  document.getElementById('speech-translation').textContent = s.translation;
+  document.getElementById('scene-context').innerHTML = s.context;
+
+  // Grammar aside
+  const ga = document.getElementById('grammar-aside');
+  const gt = document.getElementById('grammar-text');
+  if(s.grammar) { ga.style.display='block'; gt.innerHTML=s.grammar; }
+  else { ga.style.display='none'; }
+
+  // Vocab
+  vocabRevealed = new Array(s.vocab.length).fill(false);
+  document.getElementById('vocab-items').innerHTML = s.vocab.map((v,i)=>`
+    <div class="vocab-item" id="vi-${i}" onclick="revealVocab(${i})">
+      <div class="vocab-emoji">${v.emoji}</div>
+      <div class="vocab-text">
+        <span class="vocab-greek">${v.greek}</span>
+        <span class="vocab-phonetic">${v.phonetic}</span>
+        <span class="vocab-english" id="ve-${i}" style="display:none">${v.english}</span>
+      </div>
+      <div class="vocab-tap-hint">tap →</div>
+      <div class="vocab-reveal-badge">✓</div>
+    </div>`).join('');
+
+  // Challenge
+  document.getElementById('challenge-q').textContent = s.challenge.q;
+  const shuffled = [...s.challenge.options].sort(()=>Math.random()-0.5);
+  document.getElementById('choices').innerHTML = shuffled.map((opt,i)=>`
+    <button class="choice-btn" onclick="chooseAnswer(this,${opt.correct},\`${q(opt.response)}\`,\`${q(s.challenge.explanation)}\`)">
+      <span class="choice-icon">${['A','B','C'][i]}</span>${opt.text}
+    </button>`).join('');
+
+  document.getElementById('feedback-panel').className='feedback-panel';
+  document.getElementById('btn-continue').className='btn-continue';
+  updateBank();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function q(s){ return s.replace(/`/g,"'").replace(/\\/g,'\\\\'); }
+
+function revealVocab(i) {
+  if(vocabRevealed[i]) return;
+  vocabRevealed[i]=true;
+  document.getElementById(`vi-${i}`).classList.add('revealed');
+  document.getElementById(`ve-${i}`).style.display='block';
+  const word = SCENES[sceneOrder[currentIdx]].vocab[i];
+  if(!learnedWords.find(w=>w.greek===word.greek)) {
+    learnedWords.push(word);
+    document.getElementById('vocab-count').textContent=`📖 ${learnedWords.length} words`;
+    document.getElementById('bank-count').textContent=learnedWords.length;
+    updateBank();
+    showToast(`+1 → ${word.greek} 🧠`);
+  }
+}
+
+function chooseAnswer(btn, isCorrect, response, explanation) {
+  document.querySelectorAll('.choice-btn').forEach(b=>b.classList.add('done'));
+  const fp=document.getElementById('feedback-panel');
+  const fh=document.getElementById('feedback-header');
+  const fb=document.getElementById('feedback-body');
+
+  if(isCorrect) {
+    btn.classList.add('selected-correct');
+    fp.className='feedback-panel ok show';
+    fh.textContent=['Τέλεια! ✓','Μπράβο! ✓','Ωραία! ✓','Exactly! ✓'][Math.floor(Math.random()*4)];
+    fb.innerHTML=`<strong>${response}</strong><br><br>${explanation}`;
+    showToast('Μπράβο! 🎉');
+  } else {
+    btn.classList.add('selected-wrong');
+    document.querySelectorAll('.choice-btn').forEach(b=>{
+      if(b.getAttribute('onclick')?.includes('true')) b.classList.add('show-answer');
+    });
+    fp.className='feedback-panel bad show';
+    fh.textContent='Not quite...';
+    fb.innerHTML=`${response}<br><br>${explanation}`;
+    showToast('See explanation below 👇');
+  }
+  document.getElementById('btn-continue').className='btn-continue show';
+}
+
+function nextScene() {
+  currentIdx++;
+  if(currentIdx>=sceneOrder.length) endGame();
+  else renderScene();
+}
+
+function skipScene() {
+  currentIdx++;
+  if(currentIdx>=sceneOrder.length) endGame();
+  else { renderScene(); showToast('Skipped! No stress 😄'); }
+}
+
+function endGame() {
+  showScreen('end');
+  const emojis=['🏠','🎉','🫒','🌅','🇬🇷','☀️'];
+  document.getElementById('end-big').textContent=emojis[Math.floor(Math.random()*emojis.length)];
+  document.getElementById('end-sub').textContent=
+    learnedWords.length>=18
+      ? `You picked up ${learnedWords.length} words today. Nikos is delighted. Sofia already knew you'd be fine.`
+      : `${learnedWords.length} words added! Keep going — every word you know before the move is one less thing to stress about.`;
+  document.getElementById('words-list').innerHTML=learnedWords.map(w=>`<div class="word-pill">${w.greek}</div>`).join('');
+}
+
+function toggleBank() {
+  bankVisible=!bankVisible;
+  document.getElementById('vocab-bank').classList.toggle('show',bankVisible);
+}
+
+function updateBank() {
+  document.getElementById('bank-grid').innerHTML=learnedWords.map(w=>`
+    <div class="bank-item">
+      <span class="bk-greek">${w.greek}</span>
+      <span class="bk-eng">${w.english}</span>
+    </div>`).join('')||'<div style="color:var(--muted);font-size:13px;padding:8px">Tap vocab words above to add them!</div>';
+  document.getElementById('bank-count').textContent=learnedWords.length;
+}
+
+function showToast(msg) {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+</script>
+</body>
+</html>
